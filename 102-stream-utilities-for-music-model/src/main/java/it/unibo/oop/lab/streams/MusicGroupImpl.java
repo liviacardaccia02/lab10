@@ -1,6 +1,6 @@
 package it.unibo.oop.lab.streams;
 
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,27 +50,41 @@ public final class MusicGroupImpl implements MusicGroup {
 
     @Override
     public int countSongs(final String albumName) {
-        return -1;
+        return (int) this.songs.stream()
+        .filter(s -> s.getAlbumName().isPresent())
+        .filter(s -> s.albumName.get().equals(albumName))
+        .count();
     }
 
     @Override
     public int countSongsInNoAlbum() {
-        return -1;
+        return (int) this.songs.stream()
+        .filter(s -> s.getAlbumName().isEmpty())
+        .count();
     }
 
     @Override
     public OptionalDouble averageDurationOfSongs(final String albumName) {
-        return null;
+        return this.songs.stream()
+        .filter(s -> s.getAlbumName().isPresent())
+        .filter(s -> s.albumName.get().equals(albumName))
+        .mapToDouble(s -> s.getDuration())
+        .average();
     }
 
     @Override
     public Optional<String> longestSong() {
-        return null;
+        return this.songs.stream()
+        .max(Comparator.comparingDouble(s -> s.getDuration()))
+        .map(s -> s.getSongName());
     }
 
     @Override
     public Optional<String> longestAlbum() {
-        return null;
+        return albumNames().max((x, y) -> Double
+        .compare(averageDurationOfSongs(x)
+        .getAsDouble() * countSongs(x), averageDurationOfSongs(y)
+        .getAsDouble() * countSongs(y)));
     }
 
     private static final class Song {
