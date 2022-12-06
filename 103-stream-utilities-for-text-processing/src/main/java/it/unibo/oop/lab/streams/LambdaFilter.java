@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -39,11 +41,20 @@ public final class LambdaFilter extends JFrame {
          * Commands.
          */
         IDENTITY("No modifications", Function.identity()),
-        LOWERCASE("Lower case", String -> String.toLowerCase()),
-        COUNT_CHARS("Number of chars", s -> Integer.toString(s.length()));
-        /*COUNT_LINES("Number of lines", ),
-        ALPHABETICAL_ORDER("Alphabetical order", ),
-        COUNT("Words count", );*/
+        LOWERCASE("Lower case", s -> s.toLowerCase()),
+        COUNT_CHARS("Number of chars", s -> Integer.toString(s.length())),
+        COUNT_LINES("Number of lines", String -> Long.toString(String.lines().count())),
+        ALPHABETICAL_ORDER("Alphabetical order", s -> 
+            Stream.of(s.split(" "))
+                .sorted()
+                .reduce((s1, s2) -> s1.concat(" " + s2))
+                .get()),
+        WORD_OCCURRENCES("Count for each word", s -> 
+            Stream.of(s.split(" "))
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+            .entrySet().stream()
+            .map(e -> e.getKey() + " -> " + e.getValue())
+            .collect(Collectors.joining("\n")));
 
         private final String commandName;
         private final Function<String, String> fun;
